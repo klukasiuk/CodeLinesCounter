@@ -1,11 +1,13 @@
-#include <iostream>
-#include <fstream>
+#include <iostream>						// For text input/output
+#include <fstream>						// For handling files
 
-#include "win.h"
+#include "win.h"						// Some system dependent utilities
 
 using namespace std;
 
-struct expansionStatistic
+const int MinNumberOfCharsForCodeLine = 5;																// How many chars must be in line to be counted as line of code
+
+struct expansionStatistic																				// Struct for organizing data about different file expansions
 {
 	string expansion;
 
@@ -21,24 +23,23 @@ struct expansionStatistic
 
 int main()
 {
-	vector<string> SupportedExpansions;
+	vector<string> SupportedExpansions;																	// Here we put all expansions that we want to be calculated
 
-	SupportedExpansions.push_back(string(".cpp"));
+	SupportedExpansions.push_back(string(".cpp"));														// For example few c++ expansions
 	SupportedExpansions.push_back(string(".c"));
 	SupportedExpansions.push_back(string(".h"));
 	SupportedExpansions.push_back(string(".glsl"));
 
-	vector<expansionStatistic> ExpansionsStat;
+	vector<expansionStatistic> ExpansionsStat;															// Vector for combined data
 
 	string folderPath;
 
-	cout << "Do you want to write path to other folder (default is current folder) ?\n";
+	cout << "Do you want to give path to other folder (default is current folder) ?\n";					// Let the user choose folder
 	cout << "(y/n) -> ";
 
 	char choose;
 
 	cin >> choose;
-	cin.sync();
 
 	if (choose == 'y')
 	{
@@ -50,21 +51,21 @@ int main()
 	}
 	else
 	{
-		folderPath = getLocalPath();
+		folderPath = getLocalPath();																	// Get from windows folder with this program
 	}
 
 
-	vector<string> filenames = getDirectoryFilenames(folderPath);
+	vector<string> filenames = getDirectoryFilenames(folderPath);										// Get from windows all filenames in this folder
 
 	cout << "\nFound " << filenames.size() << " files\n";
 
-	for (int i = 0; i < filenames.size(); i++)
+	for (int i = 0; i < filenames.size(); i++)															// For every found file
 	{
 		string filename = filenames[i];
 
 		int pos = filename.find(".");
 
-		string expansion = filename.substr(pos, filename.size() - pos);
+		string expansion = filename.substr(pos, filename.size() - pos);									// Extract expansion
 
 		bool isFileSupported = false;
 
@@ -72,15 +73,15 @@ int main()
 		if (expansion == SupportedExpansions[a])
 		isFileSupported = true;
 
-		if (isFileSupported == false)
+		if (isFileSupported == false)																	// If we dont like this expansion continue loop
 		{
 			cout << "\nFile : " << filename << " is not supported \n";
 			continue;
 		}
 
-		ifstream FileStream((folderPath + filename).c_str());
+		ifstream FileStream((folderPath + filename).c_str());											// Lets open file
 
-		if (FileStream.is_open() == false)
+		if (FileStream.is_open() == false)																// Checking if file was opened correctly
 		{
 			cout << "\n Cannot open file :" << filename << "\n";
 			continue;
@@ -90,23 +91,23 @@ int main()
 
 		int numberOfLines = 0;
 
-		while (getline(FileStream, line))
+		while (getline(FileStream, line))																// For every line in file
 		{
-			if (line.size() > 5)
+			if (line.size() > MinNumberOfCharsForCodeLine)												// Check if line have enough chars to be considered
 			numberOfLines++;
 		}
 
 		bool isThereThatExpansion = false;
 		int expIndex = -1;
 
-		for (int b = 0; b < ExpansionsStat.size(); b++)
+		for (int b = 0; b < ExpansionsStat.size(); b++)													// Check if we arleady have files with that expansion
 		if (ExpansionsStat[b].expansion == expansion)
 		{
 			isThereThatExpansion = true;
 			expIndex = b;
 		}
 
-		if (isThereThatExpansion == false)
+		if (isThereThatExpansion == false)																// If not create new category
 		{
 			expansionStatistic statistic;
 
@@ -117,22 +118,22 @@ int main()
 			expIndex = ExpansionsStat.size() - 1;
 		}
 
-		ExpansionsStat[expIndex].numberOfFiles++;
+		ExpansionsStat[expIndex].numberOfFiles++;														// Add data to category
 		ExpansionsStat[expIndex].numberOfLines += numberOfLines;
 
-		FileStream.close();
+		FileStream.close();																				// Close file
 	}
 
 	int allLines = 0;
 	int allFiles = 0;
 
-	for (int b = 0; b < ExpansionsStat.size(); b++)
+	for (int b = 0; b < ExpansionsStat.size(); b++)														// Calculating overall result
 	{
 		allLines += ExpansionsStat[b].numberOfLines;
 		allFiles += ExpansionsStat[b].numberOfFiles;
 	}
 
-	ofstream resultFile(("CodeLinesCounter_Result_"+ getDateAndHour() + ".txt").c_str());
+	ofstream resultFile(("CodeLinesCounter_Result_"+ getDateAndHour() + ".txt").c_str());				// Open file with current date
 	
 	if (resultFile.is_open() == false)
 	{
@@ -149,18 +150,18 @@ int main()
 
 	resultFile << "DETAILED RESULT \n\n";
 
-	for (int i = 0; i < ExpansionsStat.size(); i++)
+	for (int i = 0; i < ExpansionsStat.size(); i++)														// Print results
 	{
 		resultFile << "Expansion : " << ExpansionsStat[i].expansion << "\n";
 		resultFile << "Files : " << ExpansionsStat[i].numberOfFiles << "\n";
 		resultFile << "Lines of code : " << ExpansionsStat[i].numberOfLines << "\n\n";
 	}
 
-	resultFile.close();
+	resultFile.close();																					// Close file
 
 	cout << "\nAll done :)";
 
-	waitForKey();
+	waitForKey();																						// Let user check for errors
 
 	return 0;
 }

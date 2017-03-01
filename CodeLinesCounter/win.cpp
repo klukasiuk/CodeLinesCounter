@@ -108,7 +108,6 @@ string getDate()
 	return s;
 }
 
-// Return string with date and time
 string getDateAndHour()
 {
 	string s = getDate() + "_" + getHour();
@@ -118,8 +117,7 @@ string getDateAndHour()
 
 void waitForKey()
 {
-	std::cin.sync();
-	std::cin.sync_with_stdio();
-	char c = std::getchar();
-	c = std::getchar();
+	cin.sync();
+	std::getchar();
+	std::getchar();
 }

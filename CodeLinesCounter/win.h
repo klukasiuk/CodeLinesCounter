@@ -5,12 +5,12 @@
 
 using namespace std;
 
-string getLocalPath();
+string getLocalPath();													// Return path for folder containing this program
 
-vector<string> getDirectoryFilenames(string& directoryName);
+vector<string> getDirectoryFilenames(string& directoryName);			// Lists all files in given folder
 
-void createDir(string name);
+void createDir(string name);											// Creates new dir in local dir
 
-string getDateAndHour();
+string getDateAndHour();												// Return string with current date and time
 
-void waitForKey();
+void waitForKey();														// Waits for key
