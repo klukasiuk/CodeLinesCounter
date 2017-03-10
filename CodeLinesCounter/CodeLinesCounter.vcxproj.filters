@@ -21,9 +21,18 @@
     <ClCompile Include="win.cpp">
       <Filter>Resource Files</Filter>
     </ClCompile>
+    <ClCompile Include="utilities.cpp">
+      <Filter>Resource Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="win.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="utilities.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="statistics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

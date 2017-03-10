@@ -10,7 +10,3 @@ string getLocalPath();													// Return path for folder containing this pro
 vector<string> getDirectoryFilenames(string& directoryName);			// Lists all files in given folder
 
 void createDir(string name);											// Creates new dir in local dir
-
-string getDateAndHour();												// Return string with current date and time
-
-void waitForKey();														// Waits for key

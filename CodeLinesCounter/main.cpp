@@ -2,37 +2,45 @@
 #include <fstream>						// For handling files
 
 #include "win.h"						// Some system dependent utilities
+#include "utilities.h"					// Some utilities like getting time
+#include "statistics.h"					// Structs for creating file statistics
 
-using namespace std;
+using namespace std;					// Dont care about namespaces in such small project
 
-const int MinNumberOfCharsForCodeLine = 5;																// How many chars must be in line to be counted as line of code
 
-struct expansionStatistic																				// Struct for organizing data about different file expansions
+// GLOBALS
+
+
+// CONST PARAMETERS
+
+const int MinNumberOfCharsForCodeLine = 5;													// How many chars must be in line to be counted as line of code
+
+// GLOBAL CONTAINERS
+
+vector<string> SupportedExpansions;															// Here we put all expansions that we want to be calculated
+
+vector<expansionStatistic> ExpansionsStat;													// Vector for combined data
+
+// GLOBAL PATHS
+
+string folderPath;																			// Directory containing project
+
+vector<string> filenames;																	// Listed files from folderPath directory
+
+
+// Functions
+
+
+void init()
 {
-	string expansion;
-
-	int numberOfFiles;
-
-	int numberOfLines;
-
-	expansionStatistic()
-	{
-		numberOfLines = numberOfFiles = 0;
-	}
-};
-
-int main()
-{
-	vector<string> SupportedExpansions;																	// Here we put all expansions that we want to be calculated
+	// Expansion initialization
 
 	SupportedExpansions.push_back(string(".cpp"));														// For example few c++ expansions
 	SupportedExpansions.push_back(string(".c"));
 	SupportedExpansions.push_back(string(".h"));
 	SupportedExpansions.push_back(string(".glsl"));
 
-	vector<expansionStatistic> ExpansionsStat;															// Vector for combined data
-
-	string folderPath;
+	// Getting folder with project
 
 	cout << "Do you want to give path to other folder (default is current folder) ?\n";					// Let the user choose folder
 	cout << "(y/n) -> ";
@@ -47,18 +55,21 @@ int main()
 		cout << "Path -> ";
 
 		cin >> folderPath;
-
 	}
 	else
 	{
 		folderPath = getLocalPath();																	// Get from windows folder with this program
 	}
 
+	// Listing files
 
-	vector<string> filenames = getDirectoryFilenames(folderPath);										// Get from windows all filenames in this folder
+	filenames = getDirectoryFilenames(folderPath);										// Get from windows all filenames in this folder
 
 	cout << "\nFound " << filenames.size() << " files\n";
+}
 
+void processFiles()
+{
 	for (int i = 0; i < filenames.size(); i++)															// For every found file
 	{
 		string filename = filenames[i];
@@ -70,8 +81,8 @@ int main()
 		bool isFileSupported = false;
 
 		for (int a = 0; a < SupportedExpansions.size(); a++)
-		if (expansion == SupportedExpansions[a])
-		isFileSupported = true;
+			if (expansion == SupportedExpansions[a])
+				isFileSupported = true;
 
 		if (isFileSupported == false)																	// If we dont like this expansion continue loop
 		{
@@ -94,18 +105,18 @@ int main()
 		while (getline(FileStream, line))																// For every line in file
 		{
 			if (line.size() > MinNumberOfCharsForCodeLine)												// Check if line have enough chars to be considered
-			numberOfLines++;
+				numberOfLines++;
 		}
 
 		bool isThereThatExpansion = false;
 		int expIndex = -1;
 
 		for (int b = 0; b < ExpansionsStat.size(); b++)													// Check if we arleady have files with that expansion
-		if (ExpansionsStat[b].expansion == expansion)
-		{
-			isThereThatExpansion = true;
-			expIndex = b;
-		}
+			if (ExpansionsStat[b].expansion == expansion)
+			{
+				isThereThatExpansion = true;
+				expIndex = b;
+			}
 
 		if (isThereThatExpansion == false)																// If not create new category
 		{
@@ -124,6 +135,10 @@ int main()
 		FileStream.close();																				// Close file
 	}
 
+}
+
+void printResults()
+{
 	int allLines = 0;
 	int allFiles = 0;
 
@@ -133,19 +148,21 @@ int main()
 		allFiles += ExpansionsStat[b].numberOfFiles;
 	}
 
-	ofstream resultFile(("CodeLinesCounter_Result_"+ getDateAndHour() + ".txt").c_str());				// Open file with current date
-	
+	ofstream resultFile(("CodeLinesCounter_Result_" + getDateAndHour() + ".txt").c_str());				// Open file with current date
+
 	if (resultFile.is_open() == false)
 	{
-		cout << "\n Cannot open file for result saving";
-		return -1;
+		cout << "\n Cannot open file for result saving\n";
+
+		waitForKey();
+		exit(EXIT_FAILURE);
 	}
 
 	resultFile << "CodeLinesCounter\n\n";
 	resultFile << getDateAndHour() << "\n\n";
 
 	resultFile << "OVERALL RESULT\n\n";
-	resultFile << "Files found : "<<allFiles<<"\n";
+	resultFile << "Files found : " << allFiles << "\n";
 	resultFile << "All lines of code : " << allLines << "\n\n";
 
 	resultFile << "DETAILED RESULT \n\n";
@@ -162,6 +179,24 @@ int main()
 	cout << "\nAll done :)";
 
 	waitForKey();																						// Let user check for errors
+}
+
+void release()
+{
+
+
+}
+
+
+int main()
+{
+	init();
+
+	processFiles();
+
+	printResults();
+
+	release();
 
 	return 0;
 }
