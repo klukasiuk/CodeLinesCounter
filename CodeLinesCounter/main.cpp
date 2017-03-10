@@ -55,6 +55,9 @@ void init()
 		cout << "Path -> ";
 
 		cin >> folderPath;
+
+		if (folderPath.at(folderPath.size() - 1) != '\\')
+			folderPath += '\\';
 	}
 	else
 	{
@@ -63,7 +66,12 @@ void init()
 
 	// Listing files
 
-	filenames = getDirectoryFilenames(folderPath);										// Get from windows all filenames in this folder
+	vector<string> subdirs = getSubDirectories(folderPath);
+
+	for (int i = 0; i < subdirs.size(); i++)
+		cout << subdirs[i] << "\n";
+
+	filenames = getFilesRecursively(folderPath);														// Get from windows all filenames in this folder
 
 	cout << "\nFound " << filenames.size() << " files\n";
 }
@@ -75,6 +83,9 @@ void processFiles()
 		string filename = filenames[i];
 
 		int pos = filename.find(".");
+
+		if (pos < 0)																					// In case of file without extension (linux style)
+			continue;
 
 		string expansion = filename.substr(pos, filename.size() - pos);									// Extract expansion
 
