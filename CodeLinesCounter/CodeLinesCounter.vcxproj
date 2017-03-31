@@ -123,6 +123,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="statistics.cpp" />
     <ClCompile Include="utilities.cpp" />
     <ClCompile Include="win.cpp" />
   </ItemGroup>

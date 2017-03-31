@@ -75,16 +75,18 @@ vector<string> getSubDirectories(string& directoryName)
 		FindClose(handleFile);
 	}
 
-
-	subdirs.erase(subdirs.begin());
-	subdirs.erase(subdirs.begin());
+	if (subdirs.size() >= 2)
+	{
+		subdirs.erase(subdirs.begin());				// Erasing "." and ".." folders
+		subdirs.erase(subdirs.begin());
+	}
 
 	return subdirs;
 }
 
 vector<string> getFilesRecursively(string & directoryName, int level)
 {
-	if(level > 5)					// Dont go to deep in recursion
+	if(level > 8)					// Dont go to deep in recursion
 	return vector<string>();
 
 	vector<string> filenames;
@@ -103,6 +105,30 @@ vector<string> getFilesRecursively(string & directoryName, int level)
 	}
 
 	return filenames;
+}
+
+vector<string> getSubDirectoriesRecursively(string & directoryName, int level)
+{
+	if (level > 8)					// Dont go to deep in recursion
+	return vector<string>();
+
+	vector<string> subdirs;
+	vector<string> result;
+	vector<string> subdirsFromSubdir;
+
+	subdirs = getSubDirectories(directoryName);
+
+	for (int i = 0; i < subdirs.size(); i++)
+	{
+		subdirsFromSubdir = getSubDirectoriesRecursively(directoryName + "\\" + subdirs[i], level + 1);
+
+		result.push_back(subdirs[i]);
+
+		for (int a = 0; a < subdirsFromSubdir.size(); a++)
+			result.push_back(subdirs[i] + "\\" + subdirsFromSubdir[a]);
+	}
+
+	return result;
 }
 
 void createDir(string name)

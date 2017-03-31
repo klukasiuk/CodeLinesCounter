@@ -24,6 +24,9 @@
     <ClCompile Include="utilities.cpp">
       <Filter>Resource Files</Filter>
     </ClCompile>
+    <ClCompile Include="statistics.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="win.h">

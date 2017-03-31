@@ -21,6 +21,8 @@ vector<string> SupportedExpansions;															// Here we put all expansions 
 
 vector<expansionStatistic> ExpansionsStat;													// Vector for combined data
 
+vector<fileStatistic> FileStat;																// Vector for specific data about every file
+
 // GLOBAL PATHS
 
 string folderPath;																			// Directory containing project
@@ -45,19 +47,19 @@ void init()
 	cout << "Do you want to give path to other folder (default is current folder) ?\n";					// Let the user choose folder
 	cout << "(y/n) -> ";
 
-	char choose;
+	string choose;
 
 	cin >> choose;
 
-	if (choose == 'y')
+	if (choose == "y" || choose == "Y" || choose == "yes" || choose == "Yes")
 	{
+		cout << "\n";
 		cout << "Write folder path \n";
 		cout << "Path -> ";
 
 		cin >> folderPath;
 
-		if (folderPath.at(folderPath.size() - 1) != '\\')
-			folderPath += '\\';
+		cout << "\n";
 	}
 	else
 	{
@@ -66,14 +68,16 @@ void init()
 
 	// Listing files
 
-	vector<string> subdirs = getSubDirectories(folderPath);
+	vector<string> subdirs = getSubDirectoriesRecursively(folderPath);
+
+	cout << "Found subdirectories :\n\n";
 
 	for (int i = 0; i < subdirs.size(); i++)
 		cout << subdirs[i] << "\n";
 
 	filenames = getFilesRecursively(folderPath);														// Get from windows all filenames in this folder
 
-	cout << "\nFound " << filenames.size() << " files\n";
+	cout << "\n\nFound " << filenames.size() << " files\n";
 }
 
 void processFiles()
@@ -93,7 +97,10 @@ void processFiles()
 
 		for (int a = 0; a < SupportedExpansions.size(); a++)
 			if (expansion == SupportedExpansions[a])
+			{
 				isFileSupported = true;
+				break;
+			}
 
 		if (isFileSupported == false)																	// If we dont like this expansion continue loop
 		{
@@ -101,28 +108,41 @@ void processFiles()
 			continue;
 		}
 
-		ifstream FileStream((folderPath + filename).c_str());											// Lets open file
+		fileStatistic newFile;
+
+		newFile.filename = filename;
+		newFile.expansion = expansion;
+
+		ifstream FileStream((folderPath + "\\" + filename).c_str());											// Lets open file
 
 		if (FileStream.is_open() == false)																// Checking if file was opened correctly
 		{
-			cout << "\n Cannot open file :" << filename << "\n";
+			cout << "\n Cannot open file : " << filename << "\n";
 			continue;
 		}
 
 		string line;
 
-		int numberOfLines = 0;
-
 		while (getline(FileStream, line))																// For every line in file
 		{
+			if (isBlankLine(line))
+			newFile.numberOfBlankLines++;
+
+			if (isBracketLine(line))
+			newFile.numberOfBracketLines++;
+
+			if (isThereComment(line))
+			newFile.numberOfComments++;
+
+
 			if (line.size() > MinNumberOfCharsForCodeLine)												// Check if line have enough chars to be considered
-				numberOfLines++;
+			newFile.numberOfCodeLines++;
 		}
 
 		bool isThereThatExpansion = false;
 		int expIndex = -1;
 
-		for (int b = 0; b < ExpansionsStat.size(); b++)													// Check if we arleady have files with that expansion
+		for (int b = 0; b < ExpansionsStat.size(); b++)													// Check if we already have files with that expansion
 			if (ExpansionsStat[b].expansion == expansion)
 			{
 				isThereThatExpansion = true;
@@ -141,7 +161,12 @@ void processFiles()
 		}
 
 		ExpansionsStat[expIndex].numberOfFiles++;														// Add data to category
-		ExpansionsStat[expIndex].numberOfLines += numberOfLines;
+		ExpansionsStat[expIndex].numberOfCodeLines += newFile.numberOfCodeLines;
+		ExpansionsStat[expIndex].numberOfBlankLines += newFile.numberOfBlankLines;
+		ExpansionsStat[expIndex].numberOfBracketLines += newFile.numberOfBracketLines;
+		ExpansionsStat[expIndex].numberOfComments += newFile.numberOfComments;
+
+		FileStat.push_back(newFile);																	// Add this file to summary
 
 		FileStream.close();																				// Close file
 	}
@@ -155,7 +180,7 @@ void printResults()
 
 	for (int b = 0; b < ExpansionsStat.size(); b++)														// Calculating overall result
 	{
-		allLines += ExpansionsStat[b].numberOfLines;
+		allLines += ExpansionsStat[b].numberOfCodeLines;
 		allFiles += ExpansionsStat[b].numberOfFiles;
 	}
 
@@ -169,7 +194,7 @@ void printResults()
 		exit(EXIT_FAILURE);
 	}
 
-	resultFile << "CodeLinesCounter\n\n";
+	resultFile << "CodeLinesCounter v0.9\n\n";
 	resultFile << getDateAndHour() << "\n\n";
 
 	resultFile << "OVERALL RESULT\n\n";
@@ -182,7 +207,10 @@ void printResults()
 	{
 		resultFile << "Expansion : " << ExpansionsStat[i].expansion << "\n";
 		resultFile << "Files : " << ExpansionsStat[i].numberOfFiles << "\n";
-		resultFile << "Lines of code : " << ExpansionsStat[i].numberOfLines << "\n\n";
+		resultFile << "Lines of code : " << ExpansionsStat[i].numberOfCodeLines << "\n";
+		resultFile << "Blank lines : " << ExpansionsStat[i].numberOfBlankLines << "\n";
+		resultFile << "Bracket lines : " << ExpansionsStat[i].numberOfBracketLines << "\n";
+		resultFile << "Comments  : " << ExpansionsStat[i].numberOfComments << "\n\n";
 	}
 
 	resultFile.close();																					// Close file

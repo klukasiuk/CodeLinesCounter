@@ -4,18 +4,29 @@
 
 using std::string;
 
+// Structures for organizing data
 
-struct expansionStatistic																	// Struct for organizing data about different file expansions
+struct expansionStatistic																	// Struct for organizing data about one file expansions
 {
 	string expansion;
 
 	int numberOfFiles;
 
-	int numberOfLines;
+	int numberOfBlankLines;
+
+	int numberOfBracketLines;
+
+	int numberOfCodeLines;
+
+	int numberOfComments;
 
 	expansionStatistic()
 	{
-		numberOfLines = numberOfFiles = 0;
+		numberOfFiles = 0;
+		numberOfBlankLines = 0;
+		numberOfBracketLines = 0;
+		numberOfCodeLines = 0;
+		numberOfComments = 0;
 	}
 };
 
@@ -25,10 +36,31 @@ struct fileStatistic																		// Struct for organizing data about specif
 
 	string expansion;
 
-	int numberOfLines;
+	int numberOfFiles;
+
+	int numberOfBlankLines;
+
+	int numberOfBracketLines;
+
+	int numberOfCodeLines;
+
+	int numberOfComments;
 
 	fileStatistic()
 	{
-		numberOfLines = 0;
+		numberOfFiles = 0;
+		numberOfBlankLines = 0;
+		numberOfBracketLines = 0;
+		numberOfCodeLines = 0;
+		numberOfComments = 0;
 	}
 };
+
+
+// Tests for type of line
+
+bool isBlankLine(string line);
+
+bool isBracketLine(string line);
+
+bool isThereComment(string line);
