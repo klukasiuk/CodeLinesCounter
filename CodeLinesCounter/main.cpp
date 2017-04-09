@@ -15,6 +15,7 @@ using namespace std;					// Dont care about namespaces in such small project
 
 const int MinNumberOfCharsForCodeLine = 5;													// How many chars must be in line to be counted as line of code
 
+
 // GLOBAL CONTAINERS
 
 vector<string> SupportedExpansions;															// Here we put all expansions that we want to be calculated
@@ -22,6 +23,7 @@ vector<string> SupportedExpansions;															// Here we put all expansions 
 vector<expansionStatistic> ExpansionsStat;													// Vector for combined data
 
 vector<fileStatistic> FileStat;																// Vector for specific data about every file
+
 
 // GLOBAL PATHS
 
@@ -31,7 +33,6 @@ vector<string> filenames;																	// Listed files from folderPath direct
 
 
 // Functions
-
 
 void init()
 {
@@ -104,16 +105,25 @@ void processFiles()
 
 		if (isFileSupported == false)																	// If we dont like this expansion continue loop
 		{
-			cout << "\nFile : " << filename << " is not supported \n";
+			//cout << "\nFile : " << filename << " is not supported \n";
 			continue;
 		}
 
 		fileStatistic newFile;
 
-		newFile.filename = filename;
+		string name;
+
+		pos = filename.rfind("\\");
+
+		if (pos < 0)
+			name = filename;
+		else
+			name = filename.substr(pos+1, filename.size() - pos -1);
+
+		newFile.filename = name;
 		newFile.expansion = expansion;
 
-		ifstream FileStream((folderPath + "\\" + filename).c_str());											// Lets open file
+		ifstream FileStream((folderPath + "\\" + filename).c_str());									// Lets open file
 
 		if (FileStream.is_open() == false)																// Checking if file was opened correctly
 		{
@@ -175,13 +185,19 @@ void processFiles()
 
 void printResults()
 {
-	int allLines = 0;
+	int allLinesOfCode = 0;
+	int allBlankLines = 0;
+	int allBracketLines = 0;
+	int allComments = 0;
 	int allFiles = 0;
 
 	for (int b = 0; b < ExpansionsStat.size(); b++)														// Calculating overall result
 	{
-		allLines += ExpansionsStat[b].numberOfCodeLines;
-		allFiles += ExpansionsStat[b].numberOfFiles;
+		allLinesOfCode	+= ExpansionsStat[b].numberOfCodeLines;
+		allBlankLines	+= ExpansionsStat[b].numberOfBlankLines;
+		allBracketLines	+= ExpansionsStat[b].numberOfBracketLines;
+		allComments		+= ExpansionsStat[b].numberOfComments;
+		allFiles		+= ExpansionsStat[b].numberOfFiles;
 	}
 
 	ofstream resultFile(("CodeLinesCounter_Result_" + getDateAndHour() + ".txt").c_str());				// Open file with current date
@@ -194,23 +210,43 @@ void printResults()
 		exit(EXIT_FAILURE);
 	}
 
-	resultFile << "CodeLinesCounter v0.9\n\n";
+	resultFile << "CodeLinesCounter v1.0\n\n";
 	resultFile << getDateAndHour() << "\n\n";
 
 	resultFile << "OVERALL RESULT\n\n";
-	resultFile << "Files found : " << allFiles << "\n";
-	resultFile << "All lines of code : " << allLines << "\n\n";
+	resultFile << "Files found \t\t: " << allFiles << "\n";
+	resultFile << "All lines of code \t: " << allLinesOfCode << "\n";
+	resultFile << "All blank lines \t: "	 << allBlankLines << "\n";
+	resultFile << "All bracket lines \t: " << allBracketLines << "\n";
+	resultFile << "All comments \t\t: " << allComments << "\n\n\n";
 
 	resultFile << "DETAILED RESULT \n\n";
-
+	resultFile << "Exp		Files		LoC		Blank		Bracket		Comments\n";
 	for (int i = 0; i < ExpansionsStat.size(); i++)														// Print results
 	{
-		resultFile << "Expansion : " << ExpansionsStat[i].expansion << "\n";
-		resultFile << "Files : " << ExpansionsStat[i].numberOfFiles << "\n";
-		resultFile << "Lines of code : " << ExpansionsStat[i].numberOfCodeLines << "\n";
-		resultFile << "Blank lines : " << ExpansionsStat[i].numberOfBlankLines << "\n";
-		resultFile << "Bracket lines : " << ExpansionsStat[i].numberOfBracketLines << "\n";
-		resultFile << "Comments  : " << ExpansionsStat[i].numberOfComments << "\n\n";
+		resultFile << ExpansionsStat[i].expansion << "\t\t";
+		resultFile << ExpansionsStat[i].numberOfFiles << "\t\t";
+		resultFile << ExpansionsStat[i].numberOfCodeLines << "\t\t";
+		resultFile << ExpansionsStat[i].numberOfBlankLines << "\t\t";
+		resultFile << ExpansionsStat[i].numberOfBracketLines << "\t\t";
+		resultFile << ExpansionsStat[i].numberOfComments << "\n";
+	}
+
+	resultFile << "\n\n";
+
+	resultFile << "File				LoC		Blank		Bracket		Comments\n";
+	for (int i = 0; i < FileStat.size(); i++)														// Print results
+	{
+		resultFile << FileStat[i].filename;
+		if (FileStat[i].filename.size() < 20)
+			for (int z = 0; z < 20 - FileStat[i].filename.size(); z++)
+				resultFile << " ";
+		resultFile << "\t\t";
+
+		resultFile << FileStat[i].numberOfCodeLines << "\t\t";
+		resultFile << FileStat[i].numberOfBlankLines << "\t\t";
+		resultFile << FileStat[i].numberOfBracketLines << "\t\t";
+		resultFile << FileStat[i].numberOfComments << "\n";
 	}
 
 	resultFile.close();																					// Close file
@@ -226,6 +262,8 @@ void release()
 
 }
 
+
+// Main
 
 int main()
 {
